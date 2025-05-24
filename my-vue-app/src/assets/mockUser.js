@@ -11,7 +11,9 @@ export const mockUser = {
 };
 
 // Function to update mock user data (simulates backend update)
+// In a real app, these functions would be part of a service layer making API calls.
 export const updateUserEmail = (newEmail) => {
+  // TODO: API Call - This function would be replaced by an API call to update email.
   if (typeof newEmail === 'string') {
     mockUser.email = newEmail;
     console.log(`Mock user email updated to: ${newEmail}`);
@@ -21,6 +23,7 @@ export const updateUserEmail = (newEmail) => {
 };
 
 export const updateUserSubscription = (subscribed) => {
+  // TODO: API Call - This function would be replaced by an API call to update subscription status.
   if (typeof subscribed === 'boolean') {
     mockUser.isSubscribedToBriefings = subscribed;
     console.log(`Mock user subscription updated to: ${subscribed}`);

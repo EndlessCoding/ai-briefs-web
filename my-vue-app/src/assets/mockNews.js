@@ -69,16 +69,20 @@ export const adminArticlesState = reactive({
   articles: [...initialNewsArticles]
 });
 
+// In a real app, these functions would be part of a service layer making API calls.
+
 // CRUD functions for articles
 export const getArticles = () => {
-  return [...adminArticlesState.articles]; // Return a copy
+  // TODO: API Call - This function would be replaced by an API call to GET /api/admin/articles (or /api/articles for general use)
+  return [...adminArticlesState.articles]; 
 };
 
 export const addArticle = (article) => {
+  // TODO: API Call - This function would be replaced by an API call to POST /api/admin/articles
   const newArticle = {
     ...article,
-    id: `news${String(Date.now()).slice(-4)}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`, // Simple unique ID
-    publishDate: article.publishDate || new Date().toISOString(), // Default publishDate if not provided
+    id: `news${String(Date.now()).slice(-4)}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`, 
+    publishDate: article.publishDate || new Date().toISOString(), 
     tags: article.tags || []
   };
   adminArticlesState.articles.unshift(newArticle);
@@ -86,6 +90,7 @@ export const addArticle = (article) => {
 };
 
 export const updateArticle = (updatedArticle) => {
+  // TODO: API Call - This function would be replaced by an API call to PUT /api/admin/articles/:id
   const index = adminArticlesState.articles.findIndex(a => a.id === updatedArticle.id);
   if (index !== -1) {
     adminArticlesState.articles[index] = { ...adminArticlesState.articles[index], ...updatedArticle };
@@ -95,6 +100,7 @@ export const updateArticle = (updatedArticle) => {
 };
 
 export const deleteArticle = (articleId) => {
+  // TODO: API Call - This function would be replaced by an API call to DELETE /api/admin/articles/:id
   const index = adminArticlesState.articles.findIndex(a => a.id === articleId);
   if (index !== -1) {
     adminArticlesState.articles.splice(index, 1);
@@ -103,9 +109,9 @@ export const deleteArticle = (articleId) => {
   return false;
 };
 
-// Existing function for homepage news (can be kept or refactored if admin uses all articles)
+// Existing function for homepage news
 export const getNewsPage = (page = 1, pageSize = 3) => {
-  // Filter for published articles for the homepage view
+  // TODO: API Call - This function would be replaced by an API call to GET /api/news?page=<page>&limit=<pageSize>&status=published
   const publishedArticles = adminArticlesState.articles.filter(article => article.status === 'published');
   const start = (page - 1) * pageSize;
   const end = page * pageSize;

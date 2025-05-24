@@ -189,16 +189,18 @@ const uniqueTagsForForm = computed(() => getUniqueTags());
 
 const loadArticles = () => {
   loading.value = true;
+  // TODO: API Call - Fetch articles from /api/admin/articles with filter parameters
+  // The getArticles() function currently simulates this.
   setTimeout(() => {
-    allArticles.value = getArticles(); // Get all articles
-    uniqueCategories.value = getUniqueCategories(); // For filter dropdown
-    uniqueTags.value = getUniqueTags(); // For form tag dropdown
-    applyFilters(); // Apply initial or existing filters
+    allArticles.value = getArticles(); 
+    uniqueCategories.value = getUniqueCategories(); 
+    uniqueTags.value = getUniqueTags(); 
+    applyFilters(); 
     loading.value = false;
-  }, 100); // Simulate API delay
+  }, 100); 
 };
 
-const applyFiltersAndLoad = () => { // Renamed to avoid conflict with auto-filter
+const applyFiltersAndLoad = () => { 
     loadArticles(); // This will re-fetch and then apply filters
 }
 
@@ -256,6 +258,8 @@ const submitForm = async () => {
       }
 
       if (isEditing.value) {
+        // TODO: API Call - Update article at /api/admin/articles/:id
+        // The updateArticle function currently simulates this.
         const updated = updateArticle(articleData);
         if (updated) {
           ElMessage.success('文章更新成功！');
@@ -263,6 +267,8 @@ const submitForm = async () => {
           ElMessage.error('文章更新失败。');
         }
       } else {
+        // TODO: API Call - Create new article at /api/admin/articles
+        // The addArticle function currently simulates this.
         const added = addArticle(articleData);
         ElMessage.success(`文章 "${added.title}" 添加成功！`);
       }
@@ -276,6 +282,8 @@ const submitForm = async () => {
 };
 
 const handleDelete = (articleId) => {
+  // TODO: API Call - Delete article at /api/admin/articles/:id
+  // The deleteArticle function currently simulates this.
   const success = deleteArticle(articleId);
   if (success) {
     ElMessage.success('文章删除成功！');

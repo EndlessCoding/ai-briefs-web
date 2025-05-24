@@ -47,21 +47,26 @@ export const adminResourcesState = reactive({
   resources: [...initialResources] // Use a reactive object to hold the array
 });
 
+// In a real app, these functions would be part of a service layer making API calls.
+
 export const getResources = () => {
-  return [...adminResourcesState.resources]; // Return a copy to prevent direct mutation outside of functions
+  // TODO: API Call - This function would be replaced by an API call to GET /api/admin/resources
+  return [...adminResourcesState.resources]; 
 };
 
 export const addResource = (resource) => {
+  // TODO: API Call - This function would be replaced by an API call to POST /api/admin/resources
   const newResource = {
     ...resource,
-    id: `res${String(Date.now()).slice(-4)}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`, // Simple unique ID
+    id: `res${String(Date.now()).slice(-4)}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`, 
     createdAt: new Date().toISOString()
   };
-  adminResourcesState.resources.unshift(newResource); // Add to the beginning
+  adminResourcesState.resources.unshift(newResource); 
   return newResource;
 };
 
 export const updateResource = (updatedResource) => {
+  // TODO: API Call - This function would be replaced by an API call to PUT /api/admin/resources/:id
   const index = adminResourcesState.resources.findIndex(r => r.id === updatedResource.id);
   if (index !== -1) {
     adminResourcesState.resources[index] = { ...adminResourcesState.resources[index], ...updatedResource };
@@ -71,6 +76,7 @@ export const updateResource = (updatedResource) => {
 };
 
 export const deleteResource = (resourceId) => {
+  // TODO: API Call - This function would be replaced by an API call to DELETE /api/admin/resources/:id
   const index = adminResourcesState.resources.findIndex(r => r.id === resourceId);
   if (index !== -1) {
     adminResourcesState.resources.splice(index, 1);

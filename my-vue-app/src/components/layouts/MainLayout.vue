@@ -92,19 +92,25 @@ const handleUserCommand = (command) => {
   if (command === 'profile') {
     router.push({ name: 'Profile' }); // Assuming 'Profile' is the name of the profile route
   } else if (command === 'logout') {
-    authStore.logout();
+    // TODO: API Call - Send logout request to /api/logout
+    authStore.logout(); // This updates the local auth state
     ElMessage.info('已退出登录');
     router.push('/'); // Redirect to home page after logout
   }
 };
 
 const handleLogin = () => {
-  // In a real app, this would likely show a login modal or navigate to a login page
-  authStore.login(); // Mock login with default username
+  // TODO: API Call - Send login credentials to /api/login
+  // On success, the API would return user data and a token.
+  // authStore.login() would then be called with actual user data.
+  // For now, it's a mock:
+  authStore.login(); 
   ElMessage.success('登录成功 (模拟)');
 };
 
 const handleRegister = () => {
+  // TODO: API Call - Navigate to a registration page or show a registration modal
+  // The registration page/modal would then handle form submission to /api/register
   ElMessage.info('导航到注册页面 (占位)');
   // router.push({ name: 'RegisterPage' }); // Assuming a RegisterPage route
 };

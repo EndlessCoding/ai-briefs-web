@@ -109,6 +109,7 @@ const subscribeEmail = () => {
     ElMessage.error('请输入有效的邮箱地址！');
     return;
   }
+  // TODO: API Call - Submit email to /api/subscribe
   // Mock subscription - in a real app, this would involve an API call
   isSubscribed.value = true;
   ElMessage.success(`感谢订阅：${email.value}`);
@@ -121,6 +122,8 @@ const pageSize = ref(3); // Show 3 news items per page
 const totalNews = ref(0);
 
 const loadNews = () => {
+  // TODO: API Call - Fetch paginated news from /api/news?page=<currentPage>&limit=<pageSize>
+  // The getNewsPage function currently simulates this.
   const data = getNewsPage(currentPage.value, pageSize.value);
   newsList.value = data.news;
   totalNews.value = data.total;

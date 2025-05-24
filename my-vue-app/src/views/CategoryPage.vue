@@ -55,13 +55,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { mockNews } from '../assets/mockNews.js'; // Assuming mockNews is an array
+import { getArticles } from '../assets/mockNews.js'; // Changed import
 import { ElMessage, ElSkeleton, ElEmpty } from 'element-plus';
 
 const route = useRoute();
 
 const currentCategoryName = ref('');
-const allNews = ref(mockNews); // Load all news
+const allNews = ref([]); // Initialize as empty array
 const filteredNews = ref([]);
 const categoryExists = ref(true);
 const loading = ref(true);
@@ -79,29 +79,37 @@ const filterNewsByCategory = () => {
   loading.value = true;
   currentCategoryName.value = route.params.categoryName;
   
+  // TODO: API Call - Fetch articles from /api/news?category=<categoryName>&status=published
+  // The getArticles() function currently simulates fetching all, then we filter.
+  // A real API would likely handle category and status filtering.
+  allNews.value = getArticles();
+
   // Simulate async data fetching if needed, or directly filter
-  setTimeout(() => { // Simulating a small delay
+  setTimeout(() => { // Simulating a small delay for UI feedback
     const newsForCategory = allNews.value.filter(
-      (news) => news.category === currentCategoryName.value
+      (news) => news.category === currentCategoryName.value && news.status === 'published' // Also ensure only published news on category pages
     );
 
     if (newsForCategory.length > 0) {
       filteredNews.value = newsForCategory;
       categoryExists.value = true;
     } else {
-      // Check if category itself is valid by seeing if any news item *could* belong to it
+      // Check if category itself is valid by seeing if any news item *could* belong to it (published or not)
       const knownCategories = [...new Set(allNews.value.map(item => item.category))];
       if (!knownCategories.includes(currentCategoryName.value)) {
           categoryExists.value = false;
           ElMessage.error(`分类 '${currentCategoryName.value}' 未找到。`);
+          filteredNews.value = []; 
       } else {
-          categoryExists.value = true; // Category is valid, but no articles
+          categoryExists.value = true; // Category is valid, but no published articles
           filteredNews.value = []; // Ensure it's empty
+          // Optionally, inform the user if the category exists but has no published articles
+          // ElMessage.info(`分类 '${currentCategoryName.value}' 下暂无已发布的文章。`);
       }
     }
     currentPage.value = 1; // Reset to first page
     loading.value = false;
-  }, 200); // Small delay to simulate loading
+  }, 100); // Shortened delay
 };
 
 const handlePageChange = (page) => {

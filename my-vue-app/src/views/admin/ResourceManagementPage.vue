@@ -147,9 +147,10 @@ const filters = reactive({
 
 const loadResources = () => {
   loading.value = true;
-  // Simulate API call
+  // TODO: API Call - Fetch resources from /api/admin/resources with filter parameters
+  // The getResources() function currently simulates this.
   setTimeout(() => {
-    allResources.value = getResources(); // Get a fresh copy
+    allResources.value = getResources(); 
     applyFilters();
     loading.value = false;
   }, 200);
@@ -209,6 +210,8 @@ const submitForm = async () => {
   await resourceFormRef.value.validate((valid) => {
     if (valid) {
       if (isEditing.value) {
+        // TODO: API Call - Update resource at /api/admin/resources/:id
+        // The updateResource function currently simulates this.
         const updated = updateResource({ ...resourceForm });
         if (updated) {
           ElMessage.success('资源更新成功！');
@@ -216,6 +219,8 @@ const submitForm = async () => {
           ElMessage.error('资源更新失败。');
         }
       } else {
+        // TODO: API Call - Create new resource at /api/admin/resources
+        // The addResource function currently simulates this.
         const added = addResource({ ...resourceForm });
         ElMessage.success(`资源 "${added.name}" 添加成功！`);
       }
@@ -229,6 +234,8 @@ const submitForm = async () => {
 };
 
 const handleDelete = (resourceId) => {
+  // TODO: API Call - Delete resource at /api/admin/resources/:id
+  // The deleteResource function currently simulates this.
   const success = deleteResource(resourceId);
   if (success) {
     ElMessage.success('资源删除成功！');

@@ -75,10 +75,9 @@ const isEmailEditing = ref(false);
 const editableSubscriptionStatus = ref(false);
 
 onMounted(() => {
-  // Initialize editable fields from the current mockUser state
-  // This ensures that if the mockUser data is updated elsewhere (though unlikely in this simple setup),
-  // the profile page reflects it upon mounting.
-  user.value = { ...mockUser }; // Re-sync on mount
+  // TODO: API Call - Fetch user profile data from /api/profile or /api/users/me
+  // For now, we use mockUser and re-sync it.
+  user.value = { ...mockUser }; 
   editableEmail.value = user.value.email;
   editableSubscriptionStatus.value = user.value.isSubscribedToBriefings;
 });
@@ -87,12 +86,14 @@ const toggleEmailEdit = () => {
   if (isEmailEditing.value) {
     // Attempt to save
     if (editableEmail.value !== user.value.email) {
+      // TODO: API Call - Update user email at /api/profile/email or similar
+      // The updateUserEmail function currently simulates this.
       if (updateUserEmail(editableEmail.value)) {
-        user.value.email = editableEmail.value; // Update local reactive copy
+        user.value.email = editableEmail.value; 
         ElMessage.success('邮箱更新成功！');
       } else {
         ElMessage.error('邮箱更新失败。');
-        editableEmail.value = user.value.email; // Revert if update fails
+        editableEmail.value = user.value.email; 
       }
     }
   }
@@ -100,13 +101,13 @@ const toggleEmailEdit = () => {
 };
 
 const handleSubscriptionChange = (newValue) => {
+  // TODO: API Call - Update user subscription status at /api/profile/subscription
+  // The updateUserSubscription function currently simulates this.
   if (updateUserSubscription(newValue)) {
-    user.value.isSubscribedToBriefings = newValue; // Update local reactive copy
+    user.value.isSubscribedToBriefings = newValue; 
     ElMessage.success(`新闻简报订阅已${newValue ? '开启' : '关闭'}。`);
   } else {
     ElMessage.error('订阅状态更新失败。');
-    // Revert switch if update fails - though el-switch handles its state internally,
-    // good to ensure consistency if there were an async call.
     editableSubscriptionStatus.value = user.value.isSubscribedToBriefings;
   }
 };
