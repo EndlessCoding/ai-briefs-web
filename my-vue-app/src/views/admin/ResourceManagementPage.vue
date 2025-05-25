@@ -1,20 +1,23 @@
 <template>
-  <div class="resource-management-page">
-    <el-card shadow="never">
+  <div class="admin-crud-page resource-management-page">
+    <el-card class="page-card" shadow="never">
       <template #header>
         <div class="card-header-content">
-          <h1>资源管理</h1>
-          <el-button type="primary" @click="handleCreate" :icon="Plus">新建资源</el-button>
+          <div class="header-title-container">
+            <el-icon :size="22" style="margin-right: 8px;"><Files /></el-icon>
+            <h1 class="page-title">资源管理</h1>
+          </div>
+          <el-button type="primary" @click="handleCreate" :icon="Plus" class="header-action-button">新建资源</el-button>
         </div>
       </template>
 
-      <!-- Filtering/Searching (Optional Bonus) -->
-      <el-form :inline="true" :model="filters" @submit.prevent="loadResources" class="filter-form">
+      <!-- Filtering/Searching -->
+      <el-form :inline="true" :model="filters" @submit.prevent="loadResources" class="filter-form-container">
         <el-form-item label="名称">
           <el-input v-model="filters.name" placeholder="按名称搜索" clearable />
         </el-form-item>
         <el-form-item label="类型">
-          <el-select v-model="filters.type" placeholder="按类型筛选" clearable>
+          <el-select v-model="filters.type" placeholder="按类型筛选" clearable style="width: 160px;">
             <el-option label="RSS Feed" value="RSS Feed" />
             <el-option label="API Endpoint" value="API Endpoint" />
             <el-option label="Website" value="Website" />
@@ -22,7 +25,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="按状态筛选" clearable>
+          <el-select v-model="filters.status" placeholder="按状态筛选" clearable style="width: 130px;">
             <el-option label="Active" value="active" />
             <el-option label="Inactive" value="inactive" />
             <el-option label="Pending" value="pending" />
@@ -30,55 +33,68 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadResources" :icon="Search">搜索</el-button>
+          <el-button @click="resetFiltersAndLoad" :icon="Refresh">重置</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table :data="filteredResources" style="width: 100%" v-loading="loading">
-        <el-table-column prop="name" label="名称" sortable min-width="180" />
-        <el-table-column prop="type" label="类型" sortable width="150">
+      <el-table :data="filteredResources" style="width: 100%" v-loading="loading" class="data-table">
+        <el-table-column prop="name" label="名称" sortable min-width="180" show-overflow-tooltip />
+        <el-table-column prop="type" label="类型" sortable width="150" show-overflow-tooltip>
             <template #default="scope">
-                <el-tag :type="getResourceTypeTag(scope.row.type)">{{ scope.row.type }}</el-tag>
+                <el-tag :type="getResourceTypeTag(scope.row.type)" effect="light" size="small">{{ scope.row.type }}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column prop="url" label="URL" min-width="250">
+        <el-table-column prop="url" label="URL" min-width="250" show-overflow-tooltip>
             <template #default="scope">
-                <el-link :href="scope.row.url" target="_blank" type="primary">{{ scope.row.url }}</el-link>
+                <el-link :href="scope.row.url" target="_blank" type="primary" class="table-link">{{ scope.row.url }}</el-link>
             </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="120" align="center">
           <template #default="scope">
-            <el-tag :type="getStatusTagType(scope.row.status)" disable-transitions>{{ scope.row.status }}</el-tag>
+            <el-tag :type="getStatusTagType(scope.row.status)" effect="light" size="small" disable-transitions>{{ scope.row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="创建日期" sortable width="180">
+        <el-table-column prop="createdAt" label="创建日期" sortable width="170" align="center">
           <template #default="scope">{{ formatTableDate(scope.row.createdAt) }}</template>
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row)" :icon="Edit">编辑</el-button>
+            <el-button size="small" @click="handleEdit(scope.row)" :icon="Edit" type="primary" plain>编辑</el-button>
             <el-popconfirm
               title="确定删除此资源吗？"
               confirm-button-text="确定"
               cancel-button-text="取消"
               @confirm="handleDelete(scope.row.id)"
               width="220"
+              popper-class="admin-popconfirm"
             >
               <template #reference>
-                <el-button size="small" type="danger" :icon="Delete">删除</el-button>
+                <el-button size="small" type="danger" :icon="Delete" plain>删除</el-button>
               </template>
             </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
+      
+      <!-- Pagination can be added here if many resources -->
+      <!-- <el-pagination ... /> -->
     </el-card>
 
     <!-- Dialog for Create/Edit -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="resetForm">
-      <el-form ref="resourceFormRef" :model="resourceForm" :rules="formRules" label-width="80px" label-position="right">
-        <el-form-item label="名称" prop="name">
+    <el-dialog 
+        v-model="dialogVisible" 
+        :title="dialogTitle" 
+        width="clamp(500px, 60%, 700px)" 
+        @close="resetForm" 
+        class="form-dialog"
+        top="10vh"
+        append-to-body
+      >
+      <el-form ref="resourceFormRef" :model="resourceForm" :rules="formRules" label-width="100px" label-position="right">
+        <el-form-item label="资源名称" prop="name">
           <el-input v-model="resourceForm.name" placeholder="请输入资源名称" />
         </el-form-item>
-        <el-form-item label="类型" prop="type">
+        <el-form-item label="资源类型" prop="type">
           <el-select v-model="resourceForm.type" placeholder="请选择资源类型" style="width:100%;">
             <el-option label="RSS Feed" value="RSS Feed" />
             <el-option label="API Endpoint" value="API Endpoint" />
@@ -86,20 +102,22 @@
             <el-option label="Other" value="Other" />
           </el-select>
         </el-form-item>
-        <el-form-item label="URL" prop="url">
-          <el-input v-model="resourceForm.url" placeholder="请输入资源URL" />
+        <el-form-item label="资源URL" prop="url">
+          <el-input v-model="resourceForm.url" placeholder="请输入资源URL (例如: https://example.com)" />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item label="当前状态" prop="status">
           <el-select v-model="resourceForm.status" placeholder="请选择状态" style="width:100%;">
-            <el-option label="Active" value="active" />
-            <el-option label="Inactive" value="inactive" />
-            <el-option label="Pending" value="pending" />
+            <el-option label="Active (活动)" value="active" />
+            <el-option label="Inactive (暂停)" value="inactive" />
+            <el-option label="Pending (待审核)" value="pending" />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <div class="dialog-footer">
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitForm" :loading="formSubmitting">确定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -107,13 +125,14 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Plus, Edit, Delete, Search } from '@element-plus/icons-vue';
-import { adminResourcesState, getResources, addResource, updateResource, deleteResource } from '../../assets/mockAdminResources.js';
+import { ElMessage, ElIcon } from 'element-plus';
+import { Plus, Edit, Delete, Search, Refresh, Files } from '@element-plus/icons-vue';
+import { getResources, addResource, updateResource, deleteResource } from '../../assets/mockAdminResources.js';
 
 const loading = ref(false);
-const allResources = ref([]); // Holds all resources from the mock service
-const filteredResources = ref([]); // Holds resources after filtering
+const formSubmitting = ref(false); // For dialog submit button
+const allResources = ref([]); 
+const filteredResources = ref([]); 
 
 const dialogVisible = ref(false);
 const dialogTitle = ref('');
@@ -134,7 +153,7 @@ const formRules = {
   type: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
   url: [
     { required: true, message: '请输入资源URL', trigger: 'blur' },
-    { type: 'url', message: '请输入有效的URL', trigger: ['blur', 'change'] }
+    { type: 'url', message: '请输入有效的URL格式 (如 https://example.com)', trigger: ['blur', 'change'] }
   ],
   status: [{ required: true, message: '请选择状态', trigger: 'change' }]
 };
@@ -148,7 +167,6 @@ const filters = reactive({
 const loadResources = () => {
   loading.value = true;
   // TODO: API Call - Fetch resources from /api/admin/resources with filter parameters
-  // The getResources() function currently simulates this.
   setTimeout(() => {
     allResources.value = getResources(); 
     applyFilters();
@@ -170,18 +188,16 @@ const applyFilters = () => {
   filteredResources.value = tempResources;
 };
 
+const resetFiltersAndLoad = () => {
+  filters.name = '';
+  filters.type = '';
+  filters.status = '';
+  loadResources();
+};
+
 onMounted(() => {
   loadResources();
 });
-
-// Watch for changes in adminResourcesState.resources from the mock file to keep table in sync
-// This is a simple way to react to changes if another component could modify it.
-// For this specific page, direct calls to loadResources after CUD operations are sufficient.
-// watch(() => adminResourcesState.resources, (newResources) => {
-//   allResources.value = [...newResources];
-//   applyFilters();
-// }, { deep: true });
-
 
 const resetForm = () => {
   Object.assign(resourceForm, initialFormState);
@@ -201,45 +217,48 @@ const handleEdit = (row) => {
   resetForm();
   isEditing.value = true;
   dialogTitle.value = '编辑资源';
-  Object.assign(resourceForm, row); // Copy row data to form
+  Object.assign(resourceForm, JSON.parse(JSON.stringify(row))); // Deep copy
   dialogVisible.value = true;
 };
 
 const submitForm = async () => {
   if (!resourceFormRef.value) return;
-  await resourceFormRef.value.validate((valid) => {
+  formSubmitting.value = true;
+  await resourceFormRef.value.validate(async (valid) => {
     if (valid) {
-      if (isEditing.value) {
-        // TODO: API Call - Update resource at /api/admin/resources/:id
-        // The updateResource function currently simulates this.
-        const updated = updateResource({ ...resourceForm });
-        if (updated) {
-          ElMessage.success('资源更新成功！');
+      try {
+        if (isEditing.value) {
+          // TODO: API Call - Update resource at /api/admin/resources/:id
+          const updated = updateResource({ ...resourceForm });
+          if (updated) {
+            ElMessage.success('资源更新成功！');
+          } else {
+            ElMessage.error('资源更新失败。');
+          }
         } else {
-          ElMessage.error('资源更新失败。');
+          // TODO: API Call - Create new resource at /api/admin/resources
+          const added = addResource({ ...resourceForm });
+          ElMessage.success(`资源 "${added.name}" 添加成功！`);
         }
-      } else {
-        // TODO: API Call - Create new resource at /api/admin/resources
-        // The addResource function currently simulates this.
-        const added = addResource({ ...resourceForm });
-        ElMessage.success(`资源 "${added.name}" 添加成功！`);
+        dialogVisible.value = false;
+        loadResources(); 
+      } catch (error) {
+        ElMessage.error('操作失败，请稍后再试。');
+        console.error("Form submission error:", error);
       }
-      dialogVisible.value = false;
-      loadResources(); // Refresh table data
     } else {
-      ElMessage.error('请检查表单输入。');
-      return false;
+      ElMessage.error('请检查表单输入是否正确。');
     }
+    formSubmitting.value = false;
   });
 };
 
 const handleDelete = (resourceId) => {
   // TODO: API Call - Delete resource at /api/admin/resources/:id
-  // The deleteResource function currently simulates this.
   const success = deleteResource(resourceId);
   if (success) {
     ElMessage.success('资源删除成功！');
-    loadResources(); // Refresh table data
+    loadResources(); 
   } else {
     ElMessage.error('资源删除失败。');
   }
@@ -252,55 +271,113 @@ const formatTableDate = (dateString) => {
 };
 
 const getStatusTagType = (status) => {
-  switch (status) {
-    case 'active': return 'success';
-    case 'inactive': return 'info';
-    case 'pending': return 'warning';
-    default: return 'primary';
-  }
+  if (status === 'active') return 'success';
+  if (status === 'inactive') return 'info';
+  if (status === 'pending') return 'warning';
+  return ''; // Element Plus default
 };
 const getResourceTypeTag = (type) => {
-    // Simple mapping for variety, can be expanded
     if (type === 'RSS Feed') return 'success';
     if (type === 'API Endpoint') return 'warning';
-    if (type === 'Website') return ''; // Default
+    if (type === 'Website') return 'primary';
     return 'info';
 };
 
-// Watch filters and re-apply
-Object.keys(filters).forEach(key => {
-  computed(() => filters[key])._watcher.run = () => applyFilters();
-});
-
+// No longer using computed()._watcher.run for filters, rely on explicit search button.
 </script>
 
 <style scoped>
-.resource-management-page {
-  padding: 20px;
+/* General Admin CRUD Page Styles - can be extracted to a common admin CSS file later */
+.admin-crud-page {
+  padding: 24px;
+  font-family: var(--font-family-primary);
+  background-color: var(--color-background-secondary);
 }
+
+.page-card {
+  /* Uses global .el-card styling from main.css */
+}
+
 .card-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.card-header-content h1 {
-  margin: 0; /* Reset margin for h1 inside flex */
-  font-size: 1.5em;
+.header-title-container {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-primary);
 }
-.filter-form {
+.page-title {
+  font-size: 1.5rem; /* H2 Style */
+  font-weight: 700;
+  margin: 0; /* Reset margin for h1 */
+}
+.header-action-button.el-button {
+    font-weight: 500; /* Medium for primary buttons */
+}
+
+
+.filter-form-container {
+  padding: 16px;
+  background-color: var(--color-background-primary); /* White background for filter area */
+  border-radius: 6px; /* Softer radius */
   margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f9fafc;
-  border-radius: 4px;
+  border: 1px solid var(--color-border-subtle);
 }
-.el-table {
-  margin-top: 15px;
+.filter-form-container .el-form-item {
+  margin-bottom: 0; /* Remove bottom margin for inline form items */
+}
+
+.data-table {
+  margin-top: 0; /* Table directly below filters or header */
+}
+/* Table header style */
+:deep(.el-table__header-wrapper th) {
+  background-color: var(--color-background-secondary) !important; /* Light gray for table header */
+  color: var(--color-text-primary) !important;
+  font-weight: 600;
+}
+.table-link.el-link {
+    font-size: inherit; /* Ensure link size matches table text */
+}
+/* Action buttons in table */
+.el-table .el-button--small {
+    padding: 7px 10px; /* Slightly more padding for small buttons */
+    font-weight: 500;
 }
 .el-table .el-button + .el-button,
 .el-table .el-button + .el-popconfirm .el-button {
   margin-left: 8px;
 }
-.el-dialog .el-select {
-    width: 100%;
+
+
+/* Dialog Styles */
+:deep(.form-dialog .el-dialog__header) {
+  padding: 16px 24px;
+  background-color: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border-standard);
+  margin-right: 0; /* Reset margin if any */
 }
+:deep(.form-dialog .el-dialog__title) {
+  font-family: var(--font-family-primary);
+  font-size: 1.25rem; /* H4 Style */
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+:deep(.form-dialog .el-dialog__body) {
+  padding: 24px; /* Consistent padding */
+}
+.dialog-footer {
+    padding: 10px 24px 20px;
+    text-align: right;
+    border-top: 1px solid var(--color-border-subtle);
+}
+.dialog-footer .el-button {
+    font-weight: 500;
+}
+
+/* Popconfirm styling (if needed, though Element Plus handles it well) */
+/* :global(.admin-popconfirm.el-popover) {} */
+
 </style>

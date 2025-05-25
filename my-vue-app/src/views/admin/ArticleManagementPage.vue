@@ -1,25 +1,28 @@
 <template>
-  <div class="article-management-page">
-    <el-card shadow="never">
+  <div class="admin-crud-page article-management-page">
+    <el-card class="page-card" shadow="never">
       <template #header>
         <div class="card-header-content">
-          <h1>文章管理</h1>
-          <el-button type="primary" @click="handleCreate" :icon="Plus">新建文章</el-button>
+          <div class="header-title-container">
+            <el-icon :size="22" style="margin-right: 8px;"><Document /></el-icon>
+            <h1 class="page-title">文章管理</h1>
+          </div>
+          <el-button type="primary" @click="handleCreate" :icon="Plus" class="header-action-button">新建文章</el-button>
         </div>
       </template>
 
       <!-- Filtering/Searching -->
-      <el-form :inline="true" @submit.prevent="loadArticles" class="filter-form">
+      <el-form :inline="true" @submit.prevent="applyFiltersAndLoad" class="filter-form-container">
         <el-form-item label="标题">
           <el-input v-model="filters.title" placeholder="按标题搜索" clearable />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="filters.category" placeholder="按分类筛选" clearable style="width: 150px;">
+          <el-select v-model="filters.category" placeholder="按分类筛选" clearable style="width: 160px;">
             <el-option v-for="cat in uniqueCategories" :key="cat" :label="cat" :value="cat" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="按状态筛选" clearable style="width: 150px;">
+          <el-select v-model="filters.status" placeholder="按状态筛选" clearable style="width: 160px;">
             <el-option label="Published" value="published" />
             <el-option label="Draft" value="draft" />
             <el-option label="Pending Review" value="pending review" />
@@ -27,82 +30,106 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="applyFiltersAndLoad" :icon="Search">搜索</el-button>
+          <el-button @click="resetFiltersAndLoad" :icon="Refresh">重置</el-button>
         </el-form-item>
       </el-form>
 
-      <el-table :data="filteredArticles" style="width: 100%" v-loading="loading">
-        <el-table-column prop="title" label="标题" sortable min-width="200" show-overflow-tooltip />
-        <el-table-column prop="category" label="分类" sortable width="120">
+      <el-table :data="paginatedArticles" style="width: 100%" v-loading="loading" class="data-table">
+        <el-table-column prop="title" label="标题" sortable min-width="220" show-overflow-tooltip />
+        <el-table-column prop="category" label="分类" sortable width="130" show-overflow-tooltip>
             <template #default="scope">
-                <el-tag :type="getCategoryTagType(scope.row.category)">{{ scope.row.category }}</el-tag>
+                <el-tag :type="getCategoryTagType(scope.row.category)" effect="light" size="small">{{ scope.row.category }}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column prop="publishDate" label="发布日期" sortable width="170">
+        <el-table-column prop="publishDate" label="发布日期" sortable width="170" align="center">
           <template #default="scope">{{ formatTableDate(scope.row.publishDate) }}</template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="140" align="center">
           <template #default="scope">
-            <el-tag :type="getStatusTagType(scope.row.status)" disable-transitions>{{ scope.row.status }}</el-tag>
+            <el-tag :type="getStatusTagType(scope.row.status)" effect="light" size="small" disable-transitions>{{ scope.row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="tags" label="标签" min-width="180" show-overflow-tooltip>
           <template #default="scope">
-            <el-tag v-for="tag in scope.row.tags" :key="tag" size="small" style="margin-right: 5px; margin-bottom: 2px;">{{ tag }}</el-tag>
+            <el-tag v-for="tag in scope.row.tags" :key="tag" size="small" effect="plain" class="table-tag">{{ tag }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row)" :icon="Edit">编辑</el-button>
+            <el-button size="small" @click="handleEdit(scope.row)" :icon="Edit" type="primary" plain>编辑</el-button>
             <el-popconfirm
               title="确定删除此文章吗？"
               confirm-button-text="确定"
               cancel-button-text="取消"
               @confirm="handleDelete(scope.row.id)"
               width="220"
+              popper-class="admin-popconfirm"
             >
               <template #reference>
-                <el-button size="small" type="danger" :icon="Delete">删除</el-button>
+                <el-button size="small" type="danger" :icon="Delete" plain>删除</el-button>
               </template>
             </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
+
+      <el-pagination
+        v-if="totalFilteredArticles > 0"
+        class="pagination-container"
+        :current-page="currentPage"
+        :page-sizes="[10, 20, 50, 100]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalFilteredArticles"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+      />
+       <el-empty v-if="!loading && totalFilteredArticles === 0" description="暂无符合条件的文章" />
     </el-card>
 
     <!-- Dialog for Create/Edit Article -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="750px" @close="resetForm" top="5vh">
+    <el-dialog 
+        v-model="dialogVisible" 
+        :title="dialogTitle" 
+        width="clamp(600px, 70%, 900px)" 
+        @close="resetForm" 
+        class="form-dialog"
+        top="5vh" /* Slightly lower from top for better visibility */
+        append-to-body
+      >
       <el-form ref="articleFormRef" :model="articleForm" :rules="formRules" label-width="100px" label-position="right">
-        <el-form-item label="标题" prop="title">
+        <el-form-item label="文章标题" prop="title">
           <el-input v-model="articleForm.title" placeholder="请输入文章标题" />
         </el-form-item>
-        <el-form-item label="分类" prop="category">
+        <el-form-item label="文章分类" prop="category">
           <el-select v-model="articleForm.category" placeholder="请选择或输入分类" filterable allow-create default-first-option style="width:100%;">
             <el-option v-for="cat in uniqueCategoriesForForm" :key="cat" :label="cat" :value="cat" />
           </el-select>
         </el-form-item>
-        <el-form-item label="内容" prop="content">
-          <el-input v-model="articleForm.content" type="textarea" :rows="6" placeholder="请输入文章内容" />
+        <el-form-item label="文章内容" prop="content">
+          <el-input v-model="articleForm.content" type="textarea" :autosize="{ minRows: 5, maxRows: 15 }" placeholder="请输入文章内容 (支持Markdown)" />
         </el-form-item>
-        <el-form-item label="标签" prop="tags">
+        <el-form-item label="文章标签" prop="tags">
           <el-select
             v-model="articleForm.tags"
             multiple
             filterable
             allow-create
             default-first-option
-            placeholder="请输入或选择标签"
+            placeholder="请输入或选择标签，按Enter创建新标签"
             style="width:100%;"
+            :multiple-limit="5" 
           >
             <el-option v-for="tag in uniqueTagsForForm" :key="tag" :label="tag" :value="tag" />
           </el-select>
         </el-form-item>
         <el-row :gutter="20">
             <el-col :span="12">
-                <el-form-item label="状态" prop="status">
+                <el-form-item label="当前状态" prop="status">
                 <el-select v-model="articleForm.status" placeholder="请选择状态" style="width:100%;">
-                    <el-option label="Published" value="published" />
-                    <el-option label="Draft" value="draft" />
-                    <el-option label="Pending Review" value="pending review" />
+                    <el-option label="Published (已发布)" value="published" />
+                    <el-option label="Draft (草稿)" value="draft" />
+                    <el-option label="Pending Review (待审核)" value="pending review" />
                 </el-select>
                 </el-form-item>
             </el-col>
@@ -119,13 +146,15 @@
                 </el-form-item>
             </el-col>
         </el-row>
-        <el-form-item label="摘要" prop="summary">
-          <el-input v-model="articleForm.summary" type="textarea" :rows="3" placeholder="请输入文章摘要 (可选)" />
+        <el-form-item label="文章摘要" prop="summary">
+          <el-input v-model="articleForm.summary" type="textarea" :rows="3" placeholder="请输入文章摘要 (可选，若留空会自动截取内容前200字)" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <div class="dialog-footer">
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitForm" :loading="formSubmitting">确定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -133,21 +162,27 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Plus, Edit, Delete, Search } from '@element-plus/icons-vue';
+import { ElMessage, ElIcon } from 'element-plus';
+import { Plus, Edit, Delete, Search, Refresh, Document } from '@element-plus/icons-vue';
 import { 
-  adminArticlesState, 
   getArticles, 
   addArticle, 
   updateArticle, 
   deleteArticle,
   getUniqueCategories,
   getUniqueTags
-} from '../../assets/mockNews.js'; // Ensure this path is correct
+} from '../../assets/mockNews.js'; 
 
 const loading = ref(false);
+const formSubmitting = ref(false);
 const allArticles = ref([]);
-const filteredArticles = ref([]);
+const filteredArticles = ref([]); // For table after filtering, before pagination
+const paginatedArticles = ref([]); // For current table page
+
+// Pagination state
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalFilteredArticles = ref(0);
 
 const dialogVisible = ref(false);
 const dialogTitle = ref('');
@@ -182,7 +217,6 @@ const filters = reactive({
 
 const uniqueCategories = ref([]);
 const uniqueTags = ref([]);
-// For form dropdowns, we want them to update if new categories/tags are added
 const uniqueCategoriesForForm = computed(() => getUniqueCategories());
 const uniqueTagsForForm = computed(() => getUniqueTags());
 
@@ -190,7 +224,6 @@ const uniqueTagsForForm = computed(() => getUniqueTags());
 const loadArticles = () => {
   loading.value = true;
   // TODO: API Call - Fetch articles from /api/admin/articles with filter parameters
-  // The getArticles() function currently simulates this.
   setTimeout(() => {
     allArticles.value = getArticles(); 
     uniqueCategories.value = getUniqueCategories(); 
@@ -201,7 +234,8 @@ const loadArticles = () => {
 };
 
 const applyFiltersAndLoad = () => { 
-    loadArticles(); // This will re-fetch and then apply filters
+    currentPage.value = 1;
+    loadArticles(); 
 }
 
 const applyFilters = () => {
@@ -216,6 +250,32 @@ const applyFilters = () => {
     tempArticles = tempArticles.filter(a => a.status === filters.status);
   }
   filteredArticles.value = tempArticles;
+  totalFilteredArticles.value = filteredArticles.value.length;
+  updatePaginatedArticles();
+};
+
+const resetFiltersAndLoad = () => {
+    filters.title = '';
+    filters.category = '';
+    filters.status = '';
+    applyFiltersAndLoad();
+};
+
+const updatePaginatedArticles = () => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = currentPage.value * pageSize.value;
+  paginatedArticles.value = filteredArticles.value.slice(start, end);
+};
+
+const handleSizeChange = (newSize) => {
+  pageSize.value = newSize;
+  currentPage.value = 1;
+  updatePaginatedArticles();
+};
+
+const handlePageChange = (newPage) => {
+  currentPage.value = newPage;
+  updatePaginatedArticles();
 };
 
 onMounted(() => {
@@ -224,8 +284,8 @@ onMounted(() => {
 
 const resetForm = () => {
   Object.assign(articleForm, initialFormState);
-  articleForm.tags = []; // Ensure tags array is reset properly
-  articleForm.publishDate = new Date().toISOString(); // Reset date to now
+  articleForm.tags = []; 
+  articleForm.publishDate = new Date().toISOString(); 
   if (articleFormRef.value) {
     articleFormRef.value.clearValidate();
   }
@@ -242,52 +302,57 @@ const handleEdit = (row) => {
   resetForm();
   isEditing.value = true;
   dialogTitle.value = '编辑文章';
-  // Deep copy row to form, ensuring tags are also copied correctly
   Object.assign(articleForm, JSON.parse(JSON.stringify(row))); 
   dialogVisible.value = true;
 };
 
 const submitForm = async () => {
   if (!articleFormRef.value) return;
-  await articleFormRef.value.validate((valid) => {
+  formSubmitting.value = true;
+  await articleFormRef.value.validate(async (valid) => {
     if (valid) {
       const articleData = { ...articleForm };
-      // Ensure tags are an array
       if (!Array.isArray(articleData.tags)) {
         articleData.tags = articleData.tags ? String(articleData.tags).split(',').map(t => t.trim()) : [];
       }
-
-      if (isEditing.value) {
-        // TODO: API Call - Update article at /api/admin/articles/:id
-        // The updateArticle function currently simulates this.
-        const updated = updateArticle(articleData);
-        if (updated) {
-          ElMessage.success('文章更新成功！');
-        } else {
-          ElMessage.error('文章更新失败。');
-        }
-      } else {
-        // TODO: API Call - Create new article at /api/admin/articles
-        // The addArticle function currently simulates this.
-        const added = addArticle(articleData);
-        ElMessage.success(`文章 "${added.title}" 添加成功！`);
+      // Auto-generate summary if empty
+      if (!articleData.summary && articleData.content) {
+          articleData.summary = articleData.content.substring(0, 200) + (articleData.content.length > 200 ? '...' : '');
       }
-      dialogVisible.value = false;
-      loadArticles(); // Refresh table and unique values for filters/forms
+
+      try {
+        if (isEditing.value) {
+          // TODO: API Call - Update article at /api/admin/articles/:id
+          const updated = updateArticle(articleData);
+          if (updated) {
+            ElMessage.success('文章更新成功！');
+          } else {
+            ElMessage.error('文章更新失败。');
+          }
+        } else {
+          // TODO: API Call - Create new article at /api/admin/articles
+          const added = addArticle(articleData);
+          ElMessage.success(`文章 "${added.title}" 添加成功！`);
+        }
+        dialogVisible.value = false;
+        loadArticles(); 
+      } catch (error) {
+          ElMessage.error('操作失败，请稍后再试。');
+          console.error("Form submission error:", error);
+      }
     } else {
-      ElMessage.error('请检查表单输入。');
-      return false;
+      ElMessage.error('请检查表单输入是否正确。');
     }
+    formSubmitting.value = false;
   });
 };
 
 const handleDelete = (articleId) => {
   // TODO: API Call - Delete article at /api/admin/articles/:id
-  // The deleteArticle function currently simulates this.
   const success = deleteArticle(articleId);
   if (success) {
     ElMessage.success('文章删除成功！');
-    loadArticles(); // Refresh table and unique values
+    loadArticles(); 
   } else {
     ElMessage.error('文章删除失败。');
   }
@@ -303,50 +368,110 @@ const getStatusTagType = (status) => {
   if (status === 'published') return 'success';
   if (status === 'draft') return 'warning';
   if (status === 'pending review') return 'info';
-  return 'primary';
+  return ''; // Element Plus default
 };
 
 const getCategoryTagType = (category) => {
-    // Simple hash for variety, not truly unique but good for demo
     const hash = category.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
-    const colors = ['', 'success', 'info', 'warning', 'danger']; // Element Plus tag types
+    const colors = ['primary', 'success', 'info', 'warning', 'danger'];
     return colors[Math.abs(hash) % colors.length];
 };
-
-// Watch filters and re-apply (optional, button click is primary way now)
-// Object.keys(filters).forEach(key => {
-//   watch(() => filters[key], applyFilters);
-// });
 
 </script>
 
 <style scoped>
-.article-management-page {
-  padding: 20px;
+/* Using common admin CRUD page styles from ResourceManagementPage.vue */
+/* Add any specific styles for Article Management below if needed */
+.admin-crud-page {
+  padding: 24px;
+  font-family: var(--font-family-primary);
+  background-color: var(--color-background-secondary);
 }
+
+.page-card {
+  /* Uses global .el-card styling from main.css */
+}
+
 .card-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.card-header-content h1 {
-  margin: 0;
-  font-size: 1.5em;
+.header-title-container {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-primary);
 }
-.filter-form {
+.page-title {
+  font-size: 1.5rem; /* H2 Style */
+  font-weight: 700;
+  margin: 0; 
+}
+.header-action-button.el-button {
+    font-weight: 500;
+}
+
+.filter-form-container {
+  padding: 16px;
+  background-color: var(--color-background-primary);
+  border-radius: 6px;
   margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f9fafc;
-  border-radius: 4px;
+  border: 1px solid var(--color-border-subtle);
 }
-.el-table {
-  margin-top: 15px;
+.filter-form-container .el-form-item {
+  margin-bottom: 0; 
+}
+
+.data-table {
+  margin-top: 0; 
+}
+:deep(.el-table__header-wrapper th) {
+  background-color: var(--color-background-secondary) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600;
+}
+.table-tag {
+    margin-right: 4px;
+    margin-bottom: 4px; /* For wrapping */
+}
+.el-table .el-button--small {
+    padding: 7px 10px; 
+    font-weight: 500;
 }
 .el-table .el-button + .el-button,
 .el-table .el-button + .el-popconfirm .el-button {
   margin-left: 8px;
 }
-.el-dialog .el-select, .el-dialog .el-date-picker {
-    width: 100%;
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+:deep(.form-dialog .el-dialog__header) {
+  padding: 16px 24px;
+  background-color: var(--color-background-secondary);
+  border-bottom: 1px solid var(--color-border-standard);
+  margin-right: 0;
+}
+:deep(.form-dialog .el-dialog__title) {
+  font-family: var(--font-family-primary);
+  font-size: 1.25rem; /* H4 Style */
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+:deep(.form-dialog .el-dialog__body) {
+  padding: 24px; 
+  max-height: 70vh; /* Allow body scroll for long forms */
+  overflow-y: auto;
+}
+.dialog-footer {
+    padding: 10px 24px 20px;
+    text-align: right;
+    border-top: 1px solid var(--color-border-subtle);
+}
+.dialog-footer .el-button {
+    font-weight: 500;
 }
 </style>
