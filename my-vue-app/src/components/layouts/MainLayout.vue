@@ -4,7 +4,7 @@
       <div class="header-container">
         <div class="logo-container">
           <router-link to="/" class="logo-link">
-            <img src="/logo.svg" alt="MyNewsAggregator Logo" class="logo-image" />
+            <img :src="logoUrl" alt="MyNewsAggregator Logo" class="logo-image" />
             <span>MyNewsAggregator</span>
           </router-link>
         </div>
@@ -80,6 +80,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { ElMessage, ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem, ElIcon, ElDrawer, ElButton } from 'element-plus';
 import { Menu, ArrowDown, User, Setting, SwitchButton } from '@element-plus/icons-vue';
 import { authStore } from '../../store/auth';
+import logoUrl from '@/assets/logo.svg'; // Correctly import the logo
 
 const router = useRouter();
 const route = useRoute();
