@@ -1,0 +1,290 @@
+/* Import base styles (like Vite's normalize) if it exists and is desired */
+@import './base.css'; /* Assuming base.css contains normalize.css or similar resets */
+
+/* Define global CSS variables from STYLE_GUIDE.md */
+:root {
+  /* Application-specific Design Tokens (from STYLE_GUIDE.md) */
+  --color-primary: #007AFF;
+  --color-primary-darker: #0056b3; /* For hover/active states if not using Element Plus shades */
+  --color-secondary-accent: #5AC8FA;
+
+  --color-text-primary: #212529;
+  --color-text-secondary: #6C757D;
+  --color-text-placeholder: #ADB5BD;
+  --color-text-on-dark: #E9ECEF; /* For text on dark backgrounds like admin sidebar */
+  --color-text-on-primary: #FFFFFF; /* For text on primary-colored buttons */
+
+  --color-background-primary: #FFFFFF; /* Main content background */
+  --color-background-secondary: #F8F9FA; /* Page background, card backgrounds in some themes */
+  --color-background-dark: #304156;     /* Admin sidebar, dark elements */
+  --color-background-hover: #e9ecef;    /* Subtle hover for list items, etc. */
+
+  --color-border-standard: #DEE2E6;     /* Standard borders for inputs, cards */
+  --color-border-subtle: #E9ECEF;       /* Lighter borders, dividers */
+
+  --color-status-success: #28A745;
+  --color-status-error: #DC3545;
+  --color-status-warning: #FFC107;
+  --color-status-info: #17A2B8;
+
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-secondary: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif; /* For article bodies */
+
+  --font-size-base: 16px;
+  --font-size-small: 14px;
+  --font-size-extra-small: 12px;
+  
+  --line-height-base: 1.6;
+  --line-height-heading: 1.3;
+
+  --border-radius-base: 6px; /* Style guide: 4-6px for buttons/inputs, 6-8px for cards */
+  --border-radius-small: 4px;
+  --border-radius-card: 8px;
+
+  --shadow-subtle: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.08);
+
+
+  /* Element Plus CSS Variable Overrides */
+  /* Based on STYLE_GUIDE.md and Element Plus theming guide */
+
+  /* General */
+  --el-font-family: var(--font-family-primary);
+  --el-font-size-base: var(--font-size-base); 
+  --el-font-size-large: 18px; /* Or as per scale */
+  --el-font-size-medium: 16px; /* if different from base */
+  --el-font-size-small: var(--font-size-small);
+  --el-font-size-extra-small: var(--font-size-extra-small);
+  --el-font-weight-primary: 500; /* Medium for most interactive text */
+  
+  --el-disabled-text-color: var(--color-text-placeholder);
+  --el-disabled-bg-color: var(--color-background-secondary);
+  --el-disabled-border-color: var(--color-border-subtle);
+
+  /* Colors */
+  --el-color-primary: var(--color-primary);
+  --el-color-primary-light-3: #58a6ff; /* Lighter shade for hover */
+  --el-color-primary-light-5: #8cc8ff; /* Lighter shade */
+  --el-color-primary-light-7: #b3d9ff; /* Lighter shade */
+  --el-color-primary-light-8: #cce5ff;
+  --el-color-primary-light-9: #e6f2ff; /* Very light for backgrounds, tags */
+  --el-color-primary-dark-2: #005bb3;  /* Darker shade for active */
+
+  --el-color-success: var(--color-status-success);
+  --el-color-success-light-9: #eaf7ec;
+  --el-color-warning: var(--color-status-warning);
+  --el-color-warning-light-9: #fff8e6;
+  --el-color-danger: var(--color-status-error);
+  --el-color-danger-light-9: #fdeded;
+  --el-color-info: var(--color-status-info);
+  --el-color-info-light-9: #e8f6f8;
+
+  /* Text Colors */
+  --el-text-color-primary: var(--color-text-primary);     /* For main text, titles */
+  --el-text-color-regular: var(--color-text-primary);     /* For regular text, body */
+  --el-text-color-secondary: var(--color-text-secondary); /* For supplementary text */
+  --el-text-color-placeholder: var(--color-text-placeholder);
+  --el-text-color-disabled: var(--color-text-placeholder);
+
+  /* Background Colors */
+  --el-bg-color: var(--color-background-primary);         /* Primary background for components */
+  --el-bg-color-page: var(--color-background-secondary);  /* Page background */
+  --el-bg-color-overlay: #ffffff;                       /* Dialogs, popovers */
+  --el-fill-color-light: var(--color-background-secondary); /* Hover on table rows, nav items */
+  --el-fill-color-lighter: #fcfcfd; /* Lighter version of light fill */
+
+
+  /* Border Colors */
+  --el-border-color: var(--color-border-standard);
+  --el-border-color-light: var(--color-border-subtle);
+  --el-border-color-lighter: #f2f6fc; /* Even lighter */
+  --el-border-color-extra-light: #fafafa; /* Almost invisible */
+  --el-border-color-darker: #cdd0d6; /* For hover on some bordered components */
+
+  /* Border Radius */
+  --el-border-radius-base: var(--border-radius-base); /* 6px */
+  --el-border-radius-small: var(--border-radius-small); /* 4px */
+  --el-border-radius-round: 20px; /* For round buttons or tags */
+
+  /* Box Shadow */
+  --el-box-shadow: var(--shadow-subtle); /* 0 2px 4px rgba(0,0,0,0.05) */
+  --el-box-shadow-light: 0 2px 12px 0 rgba(0,0,0,0.06);
+  --el-box-shadow-lighter: 0 2px 6px 0 rgba(0,0,0,0.03);
+  --el-box-shadow-dark: 0 2px 4px rgba(0,0,0,.12), 0 0 6px rgba(0,0,0,.04);
+
+  /* Component Specific Overrides */
+  /* Button */
+  --el-button-font-weight: 500; /* Medium */
+  --el-button-border-radius: var(--border-radius-base);
+  --el-button-default-text-color: var(--color-text-primary);
+  --el-button-default-bg-color: var(--color-background-primary);
+  --el-button-default-border-color: var(--color-border-standard);
+  --el-button-default-hover-text-color: var(--color-primary);
+  --el-button-default-hover-bg-color: var(--color-primary-light-9);
+  --el-button-default-hover-border-color: var(--color-primary-light-7);
+  --el-button-disabled-text-color: var(--color-text-placeholder);
+  --el-button-disabled-bg-color: var(--color-background-secondary);
+  --el-button-disabled-border-color: var(--color-border-subtle);
+  
+  /* Input & Select */
+  --el-input-text-color: var(--color-text-primary);
+  --el-input-bg-color: var(--color-background-primary);
+  --el-input-border-radius: var(--border-radius-base);
+  --el-input-border-color: var(--color-border-standard);
+  --el-input-hover-border-color: var(--color-primary-light-3); /* Lighter primary on hover */
+  --el-input-focus-border-color: var(--color-primary); /* Primary color on focus */
+  --el-input-placeholder-color: var(--color-text-placeholder);
+  /* Select dropdown uses popover styles, which can be themed too */
+  --el-select-dropdown-bg-color: var(--color-background-primary);
+  --el-select-option-hover-bg: var(--color-background-hover);
+  --el-select-option-selected-bg: var(--color-primary-light-9);
+  --el-select-option-selected-text-color: var(--color-primary);
+
+
+  /* Card */
+  --el-card-border-radius: var(--border-radius-card); /* 8px */
+  --el-card-bg-color: var(--color-background-primary);
+  --el-card-padding: 20px; /* Default padding */
+  --el-card-border-color: var(--color-border-subtle); /* Softer border for cards */
+  --el-card-header-padding: 16px 20px; /* Slightly less vertical padding for header */
+  --el-card-header-text-color: var(--color-text-primary);
+  --el-card-header-font-size: 1.125rem; /* H4 Style from guide (18px) */
+
+
+  /* Dialog */
+  --el-dialog-bg-color: var(--color-background-primary);
+  --el-dialog-title-font-size: 1.375rem; /* H3 Style (22px) */
+  --el-dialog-border-radius: var(--border-radius-card); /* Consistent with cards */
+  --el-dialog-padding-primary: 24px;
+
+  /* Table */
+  --el-table-text-color: var(--color-text-primary);
+  --el-table-header-text-color: var(--color-text-primary); /* Darker header text */
+  --el-table-header-bg-color: var(--color-background-secondary); /* Light gray header */
+  --el-table-tr-bg-color: var(--color-background-primary);
+  --el-table-row-hover-bg-color: var(--color-background-hover); /* Subtle hover */
+  --el-table-border-color: var(--color-border-subtle);
+  --el-table-border: 1px solid var(--el-table-border-color);
+
+  /* Tag */
+  --el-tag-font-size: var(--font-size-extra-small); /* 12px */
+  --el-tag-border-radius: var(--border-radius-small); /* 4px */
+  --el-tag-default-bg-color: var(--color-background-secondary);
+  --el-tag-default-text-color: var(--color-text-secondary);
+  --el-tag-default-border-color: var(--color-border-subtle);
+  
+  /* Menu (Dark theme for Admin Sidebar example) */
+  /* These might be applied via props or specific classes if not globally desired */
+  /* --el-menu-bg-color: var(--color-background-dark); */
+  /* --el-menu-hover-bg-color: lighten(var(--color-background-dark), 5%); */
+  /* --el-menu-text-color: var(--color-text-on-dark); */
+  /* --el-menu-active-color: var(--color-primary); */
+  /* --el-menu-item-height: 50px; */
+  /* --el-menu-item-font-size: var(--font-size-small); */
+
+  /* Pagination */
+  --el-pagination-button-bg-color: var(--color-background-primary);
+  --el-pagination-button-disabled-bg-color: var(--color-background-secondary);
+  --el-pagination-hover-color: var(--color-primary);
+}
+
+/* Global Resets and Base Styles */
+html {
+  box-sizing: border-box;
+  font-size: var(--font-size-base); 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-primary);
+  font-size: 1rem; 
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-background-secondary); 
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex; 
+  flex-direction: column; 
+}
+
+
+/* General link styling */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--color-primary-darker); 
+}
+
+/* Headings - basic styling, can be more detailed */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-primary);
+  font-weight: 600; 
+  line-height: var(--line-height-heading);
+  margin-top: 0; 
+  margin-bottom: 0.75rem; 
+  color: var(--color-text-primary);
+}
+
+h1 { font-size: 2rem; }    /* 32px */
+h2 { font-size: 1.75rem; } /* 28px */
+h3 { font-size: 1.375rem; }/* 22px */
+h4 { font-size: 1.125rem; }/* 18px */
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem; 
+}
+
+/* Element Plus specific global overrides (non-variable based, if needed) */
+/* Use sparingly, prefer CSS variables */
+.el-button {
+    font-family: var(--font-family-primary); /* Already set by --el-font-family if it works */
+    /* No !important needed if variable override works */
+}
+
+/* Global card styling (can be overridden by specific components) */
+/* This can be removed if --el-card-border-radius and --el-box-shadow work */
+/* .el-card {
+    border-radius: var(--border-radius-card) !important; 
+    box-shadow: var(--shadow-subtle) !important;
+}
+.el-card__header {
+    font-weight: 600 !important; 
+    font-family: var(--font-family-primary);
+    border-bottom: 1px solid var(--color-border-subtle) !important;
+} */
+
+/* Utility classes (optional) */
+.text-center { text-align: center; }
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) { .container { max-width: 540px; } }
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1140px; } }
+@media (min-width: 1400px) { .container { max-width: 1320px; } }
+
+/* base.css import should handle normalize and basic body styling which we are overriding here. */
+/* Ensure base.css is primarily for normalization if it's kept. */
